@@ -6,14 +6,19 @@ export async function registerServiceWorker() {
       scope: '/',
     });
 
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+
     registration.addEventListener('updatefound', () => {
       const newWorker = registration.installing;
-
       newWorker?.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // New version available
-          const event = new CustomEvent('sw-update-available');
-          window.dispatchEvent(event);
+          console.log('New content is available; please refresh.');
         }
       });
     });

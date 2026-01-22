@@ -11,7 +11,7 @@ let updateCount = 0;
 let reconnectAttempts = 0;
 
 const MAX_RECONNECT_DELAY = 30000;
-const COINGECKO_URL = 'https://api.coingecko.com/api/v3';
+const COINGECKO_URL = 'https://api.coingecko.com/api/v3'; 
 const BINANCE_WS_URL = 'wss://stream.binance.com:9443';
 
 function post(message: WorkerMessageOut) {
@@ -37,13 +37,16 @@ async function fetchCoins(): Promise<CoinData[]> {
     
     const res = await fetch(`${COINGECKO_URL}/coins/markets?${params}`);
     
+    if (res.status === 429) {
+      throw new Error('Rate Limited: Too many requests. Please wait a moment.');
+    }
+
     if (!res.ok) {
       throw new Error(`API error: ${res.status}`);
     }
     
     const data = await res.json();
     
-    // Validate response schema
     const parsed = CoinGeckoResponseSchema.safeParse(data);
     if (!parsed.success) {
       post({ type: 'error', message: 'Invalid API response format' });
@@ -64,7 +67,10 @@ async function fetchCoins(): Promise<CoinData[]> {
       sparkline: c.sparkline_in_7d?.price ?? [],
     }));
   } catch (err) {
-    post({ type: 'error', message: 'Failed to fetch coin data' });
+    post({ 
+      type: 'error', 
+      message: err instanceof Error ? err.message : 'Failed to fetch coin data' 
+    });
     return [];
   }
 }
@@ -141,6 +147,7 @@ function connectWebSocket(symbols: string[]) {
   };
 }
 
+
 async function initialize() {
   const newCoins = await fetchCoins();
   
@@ -157,6 +164,7 @@ async function initialize() {
   connectWebSocket(coins.map((c) => c.symbol));
 }
 
+// ... [Rest of file remains the same] ...
 async function refresh() {
   const newCoins = await fetchCoins();
   if (newCoins.length === 0) return;
@@ -190,6 +198,5 @@ self.onmessage = (event: MessageEvent<WorkerMessageIn>) => {
   }
 };
 
-// Start
 initialize();
 setInterval(refresh, 5 * 60 * 1000);
