@@ -44,6 +44,7 @@ export default [
         HTMLImageElement: 'readonly',
         HTMLSpanElement: 'readonly',
         HTMLTableRowElement: 'readonly',
+        HTMLElement: 'readonly',
         Worker: 'readonly',
         URL: 'readonly',
         MessageEvent: 'readonly',
