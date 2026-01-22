@@ -18,6 +18,12 @@ export function useKeyboardNavigation({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;
+      
+      // Don't handle keyboard events when user is typing in an input
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
 
       switch (event.key) {
         case 'ArrowUp':
@@ -29,9 +35,11 @@ export function useKeyboardNavigation({
           onDown?.();
           break;
         case 'Enter':
+          event.preventDefault();
           onEnter?.();
           break;
         case 'Escape':
+          event.preventDefault();
           onEscape?.();
           break;
       }

@@ -704,6 +704,71 @@ img { max-width: 100%; display: block; }
   }
   
   .coin-names { max-width: 100px; }
+  
+  /* Table responsiveness */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .price-table {
+    min-width: 500px;
+  }
+  
+  .table-toolbar {
+    justify-content: stretch;
+  }
+  
+  .search-container {
+    max-width: none;
+  }
+  
+  /* Modal responsiveness */
+  .coin-modal {
+    padding: var(--space-3);
+  }
+  
+  .coin-modal .modal-content {
+    width: calc(100vw - 2 * var(--space-3));
+    max-height: calc(100vh - 2 * var(--space-3));
+    max-width: none;
+  }
+  
+  .modal-header {
+    padding: var(--space-3) var(--space-4);
+  }
+  
+  .modal-body {
+    padding: var(--space-4);
+  }
+  
+  .modal-coin-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .modal-title h2 {
+    font-size: var(--text-base);
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  
+  .price-display .current-price {
+    font-size: var(--text-xl);
+  }
+  
+  .alert-form {
+    flex-wrap: wrap;
+  }
+  
+  .alert-select,
+  .alert-input,
+  .alert-button {
+    flex: 1 1 auto;
+  }
 }
 
 /* ============================================

@@ -29,6 +29,19 @@ export function PriceTable({ onStatsChange, refreshRef }: PriceTableProps) {
   const [selectedCoinId, setSelectedCoinId] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   
+  // Use refs to keep stable references for keyboard callbacks
+  const sortedCoinsRef = useRef(sortedCoins);
+  const selectedIndexRef = useRef(selectedIndex);
+  
+  // Update refs when values change
+  useEffect(() => {
+    sortedCoinsRef.current = sortedCoins;
+  }, [sortedCoins]);
+  
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+  
   // Reset selection when coins change
   useEffect(() => {
     if (selectedIndex >= sortedCoins.length) {
@@ -36,22 +49,34 @@ export function PriceTable({ onStatsChange, refreshRef }: PriceTableProps) {
     }
   }, [sortedCoins, selectedIndex]);
   
-  // Keyboard navigation
+  // Keyboard navigation with stable callbacks
+  const handleKeyUp = useCallback(() => {
+    const coinsLength = sortedCoinsRef.current.length;
+    setSelectedIndex((prev) => (prev > 0 ? prev - 1 : coinsLength - 1));
+  }, []);
+  
+  const handleKeyDown = useCallback(() => {
+    const coinsLength = sortedCoinsRef.current.length;
+    setSelectedIndex((prev) => (prev < coinsLength - 1 ? prev + 1 : 0));
+  }, []);
+  
+  const handleKeyEnter = useCallback(() => {
+    const idx = selectedIndexRef.current;
+    const coins = sortedCoinsRef.current;
+    if (idx >= 0 && idx < coins.length) {
+      setSelectedCoinId(coins[idx].id);
+    }
+  }, []);
+  
+  const handleKeyEscape = useCallback(() => {
+    setSelectedIndex(-1);
+  }, []);
+  
   useKeyboardNavigation({
-    onUp: useCallback(() => {
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : sortedCoins.length - 1));
-    }, [sortedCoins.length]),
-    onDown: useCallback(() => {
-      setSelectedIndex((prev) => (prev < sortedCoins.length - 1 ? prev + 1 : 0));
-    }, [sortedCoins.length]),
-    onEnter: useCallback(() => {
-      if (selectedIndex >= 0 && selectedIndex < sortedCoins.length) {
-        setSelectedCoinId(sortedCoins[selectedIndex].id);
-      }
-    }, [selectedIndex, sortedCoins]),
-    onEscape: useCallback(() => {
-      setSelectedIndex(-1);
-    }, []),
+    onUp: handleKeyUp,
+    onDown: handleKeyDown,
+    onEnter: handleKeyEnter,
+    onEscape: handleKeyEscape,
     enabled: selectedCoinId === null && sortedCoins.length > 0,
   });
   
