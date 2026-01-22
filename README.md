@@ -175,7 +175,3 @@ Price updates are handled in a dedicated Web Worker to prevent blocking the main
 3. Make your changes
 4. Run tests and linting
 5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details.
