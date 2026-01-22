@@ -2,6 +2,10 @@
 
 A real-time cryptocurrency price dashboard built with React, TypeScript, and Vite. Features live WebSocket updates, beautiful UI, and production-ready architecture.
 
+## Live Demo
+
+The production version is available at [https://crypto-live-deploy.vercel.app/](https://crypto-live-deploy.vercel.app/)
+
 ## Features
 
 - ⚡ **Real-time Updates**: Live price feeds via Binance WebSocket
@@ -44,7 +48,7 @@ A real-time cryptocurrency price dashboard built with React, TypeScript, and Vit
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/crypto-terminal.git
+git clone https://github.com/Aniumbott/crypto-terminal.git
 cd crypto-terminal
 
 # Install dependencies
