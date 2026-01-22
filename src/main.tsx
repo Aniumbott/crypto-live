@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { registerServiceWorker } from './lib/registerSW';
 import './styles/globals.css';
 
 const root = document.getElementById('root');
@@ -14,3 +15,8 @@ createRoot(root).render(
     <App />
   </StrictMode>
 );
+
+// Register service worker for PWA functionality
+if (import.meta.env.PROD) {
+  registerServiceWorker();
+}

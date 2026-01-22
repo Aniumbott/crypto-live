@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/cn';
 
 interface ToastProps {
-  id: number;
   type: 'success' | 'error' | 'info';
   message: string;
   onDismiss: () => void;

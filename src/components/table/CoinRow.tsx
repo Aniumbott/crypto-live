@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Sparkline } from './Sparkline';
+import { FavoriteButton } from '@/components/common/FavoriteButton';
 import { formatPrice, formatPercent, formatCompact, formatSupply } from '@/lib/formatters';
 import { cn } from '@/lib/cn';
 import type { CoinData } from '@/types/coin';
@@ -8,9 +9,19 @@ interface CoinRowProps {
   coin: CoinData;
   setPriceRef: (symbol: string, el: HTMLSpanElement | null) => void;
   setRowRef: (symbol: string, el: HTMLTableRowElement | null) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+  onClick: () => void;
 }
 
-export const CoinRow = memo(function CoinRow({ coin, setPriceRef, setRowRef }: CoinRowProps) {
+export const CoinRow = memo(function CoinRow({ 
+  coin, 
+  setPriceRef, 
+  setRowRef,
+  isFavorite,
+  onToggleFavorite,
+  onClick,
+}: CoinRowProps) {
   const isPositive = coin.priceChangePercent24h >= 0;
   
   return (
@@ -18,6 +29,8 @@ export const CoinRow = memo(function CoinRow({ coin, setPriceRef, setRowRef }: C
       ref={(el) => setRowRef(coin.symbol, el)}
       className="coin-row"
       data-symbol={coin.symbol}
+      onClick={onClick}
+      style={{ cursor: 'pointer' }}
     >
       <td className="col-rank">
         <span className="rank">{coin.marketCapRank}</span>
@@ -25,6 +38,11 @@ export const CoinRow = memo(function CoinRow({ coin, setPriceRef, setRowRef }: C
       
       <td className="col-name">
         <div className="coin-identity">
+          <FavoriteButton
+            isFavorite={isFavorite}
+            onToggle={onToggleFavorite}
+            coinName={coin.name}
+          />
           <img
             src={coin.image}
             alt=""

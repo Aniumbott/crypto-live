@@ -1,5 +1,6 @@
 import type { WorkerMessageIn, WorkerMessageOut } from '../types/worker';
 import type { CoinData } from '../types/coin';
+import { CoinGeckoResponseSchema } from '../lib/schemas';
 
 // State
 let coins: CoinData[] = [];
@@ -42,19 +43,14 @@ async function fetchCoins(): Promise<CoinData[]> {
     
     const data = await res.json();
     
-    return data.map((c: {
-      id: string;
-      symbol: string;
-      name: string;
-      image: string;
-      current_price: number;
-      market_cap: number;
-      market_cap_rank: number;
-      total_volume: number;
-      price_change_percentage_24h: number;
-      circulating_supply: number;
-      sparkline_in_7d: { price: number[] };
-    }) => ({
+    // Validate response schema
+    const parsed = CoinGeckoResponseSchema.safeParse(data);
+    if (!parsed.success) {
+      post({ type: 'error', message: 'Invalid API response format' });
+      return [];
+    }
+    
+    return parsed.data.map((c) => ({
       id: c.id,
       symbol: c.symbol.toUpperCase(),
       name: c.name,

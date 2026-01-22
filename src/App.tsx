@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { OfflineBanner } from '@/components/common/OfflineBanner';
 import { Header } from '@/components/layout/Header';
 import { StatusBar } from '@/components/layout/StatusBar';
 import { PriceTable } from '@/components/table/PriceTable';
@@ -23,6 +24,7 @@ function AppContent() {
   return (
     <div className="app">
       <Header stats={stats} onRefresh={handleRefresh} />
+      <OfflineBanner />
       <main className="main">
         <div className="container">
           <header className="page-header">
