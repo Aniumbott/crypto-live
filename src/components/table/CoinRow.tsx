@@ -12,6 +12,7 @@ interface CoinRowProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
 export const CoinRow = memo(function CoinRow({ 
@@ -21,16 +22,20 @@ export const CoinRow = memo(function CoinRow({
   isFavorite,
   onToggleFavorite,
   onClick,
+  isSelected = false,
 }: CoinRowProps) {
   const isPositive = coin.priceChangePercent24h >= 0;
   
   return (
     <tr
       ref={(el) => setRowRef(coin.symbol, el)}
-      className="coin-row"
+      className={cn('coin-row', isSelected && 'selected')}
       data-symbol={coin.symbol}
       onClick={onClick}
       style={{ cursor: 'pointer' }}
+      tabIndex={0}
+      role="button"
+      aria-label={`View details for ${coin.name}`}
     >
       <td className="col-rank">
         <span className="rank">{coin.marketCapRank}</span>

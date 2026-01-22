@@ -3,6 +3,7 @@ import { usePriceWorker } from '@/hooks/usePriceWorker';
 import { useSearch } from '@/hooks/useSearch';
 import { useSort } from '@/hooks/useSort';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { CoinRow } from './CoinRow';
 import { SortableHeader } from './SortableHeader';
 import { SearchInput } from '@/components/common/SearchInput';
@@ -26,6 +27,33 @@ export function PriceTable({ onStatsChange, refreshRef }: PriceTableProps) {
   const { toggle: toggleFavorite, isFavorite } = useFavorites();
   
   const [selectedCoinId, setSelectedCoinId] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  
+  // Reset selection when coins change
+  useEffect(() => {
+    if (selectedIndex >= sortedCoins.length) {
+      setSelectedIndex(sortedCoins.length - 1);
+    }
+  }, [sortedCoins, selectedIndex]);
+  
+  // Keyboard navigation
+  useKeyboardNavigation({
+    onUp: useCallback(() => {
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : sortedCoins.length - 1));
+    }, [sortedCoins.length]),
+    onDown: useCallback(() => {
+      setSelectedIndex((prev) => (prev < sortedCoins.length - 1 ? prev + 1 : 0));
+    }, [sortedCoins.length]),
+    onEnter: useCallback(() => {
+      if (selectedIndex >= 0 && selectedIndex < sortedCoins.length) {
+        setSelectedCoinId(sortedCoins[selectedIndex].id);
+      }
+    }, [selectedIndex, sortedCoins]),
+    onEscape: useCallback(() => {
+      setSelectedIndex(-1);
+    }, []),
+    enabled: selectedCoinId === null && sortedCoins.length > 0,
+  });
   
   useEffect(() => {
     refreshRef.current = refresh;
@@ -125,7 +153,7 @@ export function PriceTable({ onStatsChange, refreshRef }: PriceTableProps) {
             </tr>
           </thead>
           <tbody>
-            {sortedCoins.map((coin) => (
+            {sortedCoins.map((coin, index) => (
               <CoinRow
                 key={coin.id}
                 coin={coin}
@@ -134,6 +162,7 @@ export function PriceTable({ onStatsChange, refreshRef }: PriceTableProps) {
                 isFavorite={isFavorite(coin.id)}
                 onToggleFavorite={() => toggleFavorite(coin.id)}
                 onClick={() => handleCoinClick(coin)}
+                isSelected={index === selectedIndex}
               />
             ))}
           </tbody>

@@ -1,4 +1,6 @@
-import { useEffect, useRef, useMemo, type MouseEvent } from 'react';
+import { useEffect, useRef, useMemo, useState, type MouseEvent } from 'react';
+import { usePriceAlerts } from '@/hooks/usePriceAlerts';
+import { useToast } from '@/context/ToastContext';
 import { formatPrice, formatCompact, formatPercent } from '@/lib/formatters';
 import type { CoinData } from '@/types/coin';
 
@@ -10,11 +12,22 @@ interface CoinDetailModalProps {
 
 export function CoinDetailModal({ coinId, coins, onClose }: CoinDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const { showToast } = useToast();
+  const { alerts, addAlert, removeAlert } = usePriceAlerts(coins);
+  
+  const [alertType, setAlertType] = useState<'above' | 'below'>('above');
+  const [alertPrice, setAlertPrice] = useState<string>('');
   
   // Get the latest coin data from the live coins array
   const coin = useMemo(
     () => coins.find((c) => c.id === coinId),
     [coins, coinId]
+  );
+  
+  // Filter alerts for this coin
+  const coinAlerts = useMemo(
+    () => alerts.filter((a) => a.coinId === coinId),
+    [alerts, coinId]
   );
 
   useEffect(() => {
@@ -42,6 +55,25 @@ export function CoinDetailModal({ coinId, coins, onClose }: CoinDetailModalProps
 
   const handleBackdropClick = (e: MouseEvent<HTMLDialogElement>) => {
     if (e.target === dialogRef.current) onClose();
+  };
+  
+  const handleAddAlert = () => {
+    const price = parseFloat(alertPrice);
+    if (isNaN(price) || price <= 0) {
+      showToast('error', 'Please enter a valid price');
+      return;
+    }
+    
+    addAlert({
+      coinId: coin.id,
+      coinSymbol: coin.symbol.toUpperCase(),
+      type: alertType,
+      targetPrice: price,
+      triggered: false,
+    });
+    
+    showToast('success', `Alert set for ${coin.symbol.toUpperCase()} ${alertType} ${formatPrice(price)}`);
+    setAlertPrice('');
   };
 
   return (
@@ -98,6 +130,58 @@ export function CoinDetailModal({ coinId, coins, onClose }: CoinDetailModalProps
               </dd>
             </div>
           </dl>
+          
+          <div className="alert-section">
+            <h3 className="alert-section-title">Price Alerts</h3>
+            
+            <div className="alert-form">
+              <select 
+                value={alertType} 
+                onChange={(e) => setAlertType(e.target.value as 'above' | 'below')}
+                className="alert-select"
+              >
+                <option value="above">Above</option>
+                <option value="below">Below</option>
+              </select>
+              
+              <input
+                type="number"
+                value={alertPrice}
+                onChange={(e) => setAlertPrice(e.target.value)}
+                placeholder="Enter price..."
+                className="alert-input"
+                step="any"
+                min="0"
+              />
+              
+              <button onClick={handleAddAlert} className="alert-button">
+                Add Alert
+              </button>
+            </div>
+            
+            {coinAlerts.length > 0 && (
+              <ul className="alert-list">
+                {coinAlerts.map((alert) => (
+                  <li key={alert.id} className={`alert-item ${alert.triggered ? 'triggered' : ''}`}>
+                    <div className="alert-info">
+                      <span className="alert-type">
+                        {alert.type === 'above' ? '↑' : '↓'} {alert.type}
+                      </span>
+                      <span className="alert-price">{formatPrice(alert.targetPrice)}</span>
+                      {alert.triggered && <span className="alert-triggered-badge">Triggered</span>}
+                    </div>
+                    <button
+                      onClick={() => removeAlert(alert.id)}
+                      className="alert-remove"
+                      aria-label="Remove alert"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </dialog>

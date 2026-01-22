@@ -9,10 +9,21 @@ A real-time cryptocurrency price dashboard built with React, TypeScript, and Vit
 - 🎨 **Modern UI**: Dark/light theme with smooth animations
 - 📱 **Responsive**: Mobile-first design
 - ♿ **Accessible**: ARIA labels, keyboard navigation, screen reader support
+- ⌨️ **Keyboard Navigation**: Arrow keys to navigate, Enter to select, Escape to clear
 - 🔄 **Auto-refresh**: Rankings update every 5 minutes
 - 🔔 **Notifications**: Connection status and error toasts
 - 📈 **Sparklines**: 7-day price charts
+- ⭐ **Favorites**: Mark and track your favorite coins
 - 🚀 **Performance**: Web Workers, memoization, optimized builds
+- 📱 **PWA Support**: Installable as app with offline support
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Navigate between coin rows |
+| `Enter` | Open details for selected coin |
+| `Escape` | Clear selection |
 
 ## Tech Stack
 
