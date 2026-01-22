@@ -1,7 +1,6 @@
-import { useEffect, useRef, useMemo, useState, type MouseEvent } from 'react';
-import { usePriceAlerts } from '@/hooks/usePriceAlerts';
-import { useToast } from '@/context/ToastContext';
-import { formatPrice, formatCompact, formatPercent } from '@/lib/formatters';
+import { useEffect, useRef, useCallback, type KeyboardEvent } from 'react';
+import { formatPrice, formatNumber, formatPercent } from '@/lib/formatters';
+import { Sparkline } from '@/components/table/Sparkline';
 import type { CoinData } from '@/types/coin';
 
 interface CoinDetailModalProps {
@@ -11,179 +10,172 @@ interface CoinDetailModalProps {
 }
 
 export function CoinDetailModal({ coinId, coins, onClose }: CoinDetailModalProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const { showToast } = useToast();
-  const { alerts, addAlert, removeAlert } = usePriceAlerts(coins);
-  
-  const [alertType, setAlertType] = useState<'above' | 'below'>('above');
-  const [alertPrice, setAlertPrice] = useState<string>('');
-  
-  // Get the latest coin data from the live coins array
-  const coin = useMemo(
-    () => coins.find((c) => c.id === coinId),
-    [coins, coinId]
-  );
-  
-  // Filter alerts for this coin
-  const coinAlerts = useMemo(
-    () => alerts.filter((a) => a.coinId === coinId),
-    [alerts, coinId]
-  );
+  const modalRef = useRef<HTMLDivElement>(null);
+  const coin = coins.find((c) => c.id === coinId);
+
+  const handleBackdropClick = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const handleBackdropKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      onClose();
+    }
+  }, [onClose]);
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    dialog.showModal();
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
 
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
   }, [onClose]);
-  
+
+  useEffect(() => {
+    modalRef.current?.focus();
+  }, []);
+
   if (!coin) return null;
 
-  const handleBackdropClick = (e: MouseEvent<HTMLDialogElement>) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-  
-  const handleAddAlert = () => {
-    const price = parseFloat(alertPrice);
-    if (isNaN(price) || price <= 0) {
-      showToast('error', 'Please enter a valid price');
-      return;
-    }
-    
-    addAlert({
-      coinId: coin.id,
-      coinSymbol: coin.symbol.toUpperCase(),
-      type: alertType,
-      targetPrice: price,
-      triggered: false,
-    });
-    
-    showToast('success', `Alert set for ${coin.symbol.toUpperCase()} ${alertType} ${formatPrice(price)}`);
-    setAlertPrice('');
-  };
+  const isPositive = coin.priceChangePercent24h >= 0;
 
   return (
-    /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
-    <dialog
-      ref={dialogRef}
-      className="coin-modal"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      onClick={handleBackdropClick}
     >
-      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
-      <div className="modal-content" role="document">
-        <header className="modal-header">
-          <div className="modal-title">
-            <img src={coin.image} alt="" className="modal-coin-icon" />
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-surface-950/60 backdrop-blur-sm animate-fade-in"
+        onClick={handleBackdropClick}
+        onKeyDown={handleBackdropKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label="Close modal"
+      />
+
+      {/* Modal */}
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="relative w-full max-w-lg bg-white dark:bg-surface-900 rounded-2xl shadow-2xl animate-scale-in overflow-hidden border border-surface-200 dark:border-surface-800"
+      >
+        {/* Header */}
+        <div className="relative p-6 pb-4 border-b border-surface-200 dark:border-surface-800">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+            aria-label="Close modal"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <div className="flex items-center gap-4">
+            <img
+              src={coin.image}
+              alt={coin.name}
+              className="w-16 h-16 rounded-full ring-2 ring-surface-200 dark:ring-surface-700 bg-white"
+            />
             <div>
-              <h2 id="modal-title">{coin.name}</h2>
-              <span className="modal-symbol">{coin.symbol}</span>
+              <h2 id="modal-title" className="text-2xl font-bold text-surface-900 dark:text-white">
+                {coin.name}
+              </h2>
+              <p className="text-surface-500 dark:text-surface-400 uppercase">
+                {coin.symbol} â€¢ Rank #{coin.marketCapRank}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="modal-close" aria-label="Close">
-            ×
-          </button>
-        </header>
+        </div>
 
-        <div className="modal-body">
-          <div className="price-display">
-            <span className="current-price">{formatPrice(coin.currentPrice)}</span>
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Price Section */}
+          <div>
+            <p className="text-3xl font-bold font-mono text-surface-900 dark:text-white mb-2">
+              {formatPrice(coin.currentPrice)}
+            </p>
             <span
-              className={`change ${coin.priceChangePercent24h >= 0 ? 'positive' : 'negative'}`}
+              className={`
+                inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-medium
+                ${isPositive
+                  ? 'bg-success-50 text-success-700 dark:bg-success-950 dark:text-success-400'
+                  : 'bg-danger-50 text-danger-700 dark:bg-danger-950 dark:text-danger-400'
+                }
+              `}
             >
-              {formatPercent(coin.priceChangePercent24h)}
+              <svg
+                className={`w-4 h-4 ${isPositive ? '' : 'rotate-180'}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+              {formatPercent(Math.abs(coin.priceChangePercent24h))} (24h)
             </span>
           </div>
 
-          <dl className="stats-grid">
-            <div className="stat">
-              <dt>Market Cap</dt>
-              <dd>{formatCompact(coin.marketCap)}</dd>
-            </div>
-            <div className="stat">
-              <dt>24h Volume</dt>
-              <dd>{formatCompact(coin.totalVolume)}</dd>
-            </div>
-            <div className="stat">
-              <dt>Rank</dt>
-              <dd>#{coin.marketCapRank}</dd>
-            </div>
-            <div className="stat">
-              <dt>Circulating Supply</dt>
-              <dd>
-                {coin.circulatingSupply.toLocaleString()} {coin.symbol}
-              </dd>
-            </div>
-          </dl>
-          
-          <div className="alert-section">
-            <h3 className="alert-section-title">Price Alerts</h3>
-            
-            <div className="alert-form">
-              <select 
-                value={alertType} 
-                onChange={(e) => setAlertType(e.target.value as 'above' | 'below')}
-                className="alert-select"
-              >
-                <option value="above">Above</option>
-                <option value="below">Below</option>
-              </select>
-              
-              <input
-                type="number"
-                value={alertPrice}
-                onChange={(e) => setAlertPrice(e.target.value)}
-                placeholder="Enter price..."
-                className="alert-input"
-                step="any"
-                min="0"
-              />
-              
-              <button onClick={handleAddAlert} className="alert-button">
-                Add Alert
-              </button>
-            </div>
-            
-            {coinAlerts.length > 0 && (
-              <ul className="alert-list">
-                {coinAlerts.map((alert) => (
-                  <li key={alert.id} className={`alert-item ${alert.triggered ? 'triggered' : ''}`}>
-                    <div className="alert-info">
-                      <span className="alert-type">
-                        {alert.type === 'above' ? '↑' : '↓'} {alert.type}
-                      </span>
-                      <span className="alert-price">{formatPrice(alert.targetPrice)}</span>
-                      {alert.triggered && <span className="alert-triggered-badge">Triggered</span>}
-                    </div>
-                    <button
-                      onClick={() => removeAlert(alert.id)}
-                      className="alert-remove"
-                      aria-label="Remove alert"
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+          {/* Chart */}
+          <div className="bg-surface-50 dark:bg-surface-950/50 rounded-xl p-4 border border-surface-100 dark:border-surface-800">
+            <p className="text-sm text-surface-500 dark:text-surface-400 mb-3">Last 7 Days</p>
+            <Sparkline data={coin.sparkline} isPositive={isPositive} width={400} height={80} />
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <StatCard
+              label="Market Cap"
+              value={`$${formatNumber(coin.marketCap)}`}
+            />
+            <StatCard
+              label="24h Volume"
+              value={`$${formatNumber(coin.totalVolume)}`}
+            />
+            <StatCard
+              label="Circulating Supply"
+              value={`${formatNumber(coin.circulatingSupply)} ${coin.symbol}`}
+            />
+            <StatCard
+              label="Volume/Market Cap"
+              value={((coin.totalVolume / coin.marketCap) * 100).toFixed(2) + '%'}
+            />
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-surface-50 dark:bg-surface-950/50 border-t border-surface-200 dark:border-surface-800">
+          <button
+            className="btn btn-primary w-full justify-center"
+            onClick={() => window.open(`https://www.coingecko.com/en/coins/${coin.id}`, '_blank')}
+          >
+            View on CoinGecko
+          </button>
+        </div>
       </div>
-    </dialog>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-surface-50 dark:bg-surface-950/50 rounded-xl p-4 border border-surface-100 dark:border-surface-800">
+      <p className="text-xs uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-1">
+        {label}
+      </p>
+      <p className="text-lg font-semibold text-surface-900 dark:text-white">
+        {value}
+      </p>
+    </div>
   );
 }

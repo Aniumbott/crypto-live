@@ -12,15 +12,15 @@ interface State {
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   state: State = { hasError: false };
-  
+
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
-  
+
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('Error caught by boundary:', error, info);
   }
-  
+
   render() {
     if (this.state.hasError) {
       return this.props.fallback || (
@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
           <div className="error-content">
             <h2>Something went wrong</h2>
             <p>{this.state.error?.message || 'An unexpected error occurred'}</p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="btn btn-primary"
             >

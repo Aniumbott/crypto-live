@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import { formatNumber, formatLatency } from '@/lib/formatters';
-import { cn } from '@/lib/cn';
 import type { WorkerStats } from '@/types/worker';
 
 interface StatusBarProps {
@@ -8,44 +5,23 @@ interface StatusBarProps {
 }
 
 export function StatusBar({ stats }: StatusBarProps) {
-  const [time, setTime] = useState(() => new Date());
-  
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  
   return (
-    <footer className="status-bar">
-      <div className="status-left">
-        <div className="status-item">
-          <span className="status-label">Updates/sec</span>
-          <span className={cn('status-value', stats.updatesPerSecond > 0 && 'highlight')}>
-            {formatNumber(stats.updatesPerSecond)}
+    <footer className="glass border-t border-surface-200/50 dark:border-surface-700/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-10 text-xs">
+          <div className="flex items-center gap-2">
+            <span
+              className={`status-dot ${stats.isConnected ? 'status-dot-connected' : 'status-dot-disconnected'
+                }`}
+            />
+            <span className="text-surface-600 dark:text-surface-400">
+              {stats.isConnected ? 'Connected to Binance' : 'Disconnected'}
+            </span>
+          </div>
+          <span className="hidden sm:inline text-surface-400">
+            Data from CoinGecko & Binance
           </span>
         </div>
-        
-        <span className="status-divider" aria-hidden="true" />
-        
-        <div className="status-item">
-          <span className="status-label">Latency</span>
-          <span className="status-value">{formatLatency(stats.latency)}</span>
-        </div>
-        
-        <span className="status-divider" aria-hidden="true" />
-        
-        <div className="status-item">
-          <span className={cn('status-dot', stats.isConnected ? 'online' : 'offline')} aria-hidden="true" />
-          <span className="status-value">
-            {stats.isConnected ? 'Connected' : 'Disconnected'}
-          </span>
-        </div>
-      </div>
-      
-      <div className="status-right">
-        <time className="status-time" dateTime={time.toISOString()}>
-          {time.toLocaleTimeString('en-US', { hour12: false })}
-        </time>
       </div>
     </footer>
   );

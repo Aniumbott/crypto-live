@@ -1,6 +1,6 @@
 # CryptoLive
 
-A real-time cryptocurrency price dashboard built with React, TypeScript, and Vite. Features live WebSocket updates, beautiful UI, and production-ready architecture.
+A real-time cryptocurrency price dashboard built with React, TypeScript, and Vite. Features live WebSocket updates, a clean modern UI, and production-ready architecture.
 
 ## Live Demo
 
@@ -8,34 +8,30 @@ The production version is available at [https://crypto-live-deploy.vercel.app/](
 
 ## Features
 
-- ⚡ **Real-time Updates**: Live price feeds via Binance WebSocket
-- 📊 **Market Data**: Top 10 cryptocurrencies by market cap
-- 🎨 **Modern UI**: Dark/light theme with smooth animations
-- 📱 **Responsive**: Mobile-first design
-- ♿ **Accessible**: ARIA labels, keyboard navigation, screen reader support
-- ⌨️ **Keyboard Navigation**: Arrow keys to navigate, Enter to select, Escape to clear
-- 🔄 **Auto-refresh**: Rankings update every 5 minutes
-- 🔔 **Notifications**: Connection status and error toasts
-- 📈 **Sparklines**: 7-day price charts
-- ⭐ **Favorites**: Mark and track your favorite coins
-- 🚀 **Performance**: Web Workers, memoization, optimized builds
-- 📱 **PWA Support**: Installable as app with offline support
-
-## Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` | Navigate between coin rows |
-| `Enter` | Open details for selected coin |
-| `Escape` | Clear selection |
+- ⚡ **Real-time Updates**: Live price feeds via Binance WebSocket with sub-second latency.
+- 📊 **Market Data**: Top cryptocurrencies by market cap with auto-refreshing rankings.
+- 🎨 **Modern UI**: Default Dark Mode with optional Light Mode, utilizing a clean Slate/Blue color palette.
+- 📱 **Responsive**: Mobile-first design with horizontal scrolling tables.
+- ♿ **Accessible**: ARIA labels, keyboard navigation, and screen reader support.
+- ⌨️ **Keyboard Navigation**: 
+  - `↑` / `↓` to navigate rows.
+  - `Enter` to view details.
+  - `Escape` to clear selection or close modals.
+  - `/` to focus search.
+- 📉 **Sparklines**: Visual 7-day price trend indicators.
+- ⭐️ **Favorites**: Pin your favorite coins to the top.
+- 🚀 **Performance**: 
+  - Web Workers for off-main-thread data processing.
+  - `tabular-nums` for stable numeric updates.
+  - Virtual DOM optimizations for rapid price flashes.
 
 ## Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite
-- **Styling**: CSS Variables, CSS Grid/Flexbox
-- **Data**: CoinGecko API, Binance WebSocket
+- **Styling**: Tailwind CSS (Slate, Blue, Emerald, Rose palette)
+- **Data**: CoinGecko API (Metadata), Binance WebSocket (Live Prices)
+- **State**: React Context + Web Workers
 - **Build**: Vite with Terser minification
-- **Linting**: ESLint with TypeScript rules
 
 ## Getting Started
 
@@ -63,10 +59,10 @@ The app will be available at `http://localhost:3000`.
 ### Build for Production
 
 ```bash
-# Build the app
+# Type check and build
 npm run build
 
-# Preview production build
+# Preview the build locally
 npm run preview
 ```
 
@@ -74,47 +70,21 @@ npm run preview
 
 ```
 crypto-terminal/
-├── public/
-│   └── favicon.svg
+├── public/              # Static assets (manifest, icons)
 ├── src/
 │   ├── components/
-│   │   ├── common/
-│   │   │   ├── ErrorBoundary.tsx
-│   │   │   ├── LoadingSkeleton.tsx
-│   │   │   └── Toast.tsx
-│   │   ├── layout/
-│   │   │   ├── Header.tsx
-│   │   │   └── StatusBar.tsx
-│   │   └── table/
-│   │       ├── CoinRow.tsx
-│   │       ├── PriceTable.tsx
-│   │       └── Sparkline.tsx
-│   ├── context/
-│   │   ├── ThemeContext.tsx
-│   │   └── ToastContext.tsx
-│   ├── hooks/
-│   │   └── usePriceWorker.ts
-│   ├── lib/
-│   │   ├── cn.ts
-│   │   ├── constants.ts
-│   │   └── formatters.ts
-│   ├── styles/
-│   │   └── globals.css
-│   ├── types/
-│   │   ├── coin.ts
-│   │   └── worker.ts
-│   ├── workers/
-│   │   └── price.worker.ts
-│   ├── App.tsx
-│   └── main.tsx
-├── .env.example
-├── .gitignore
-├── index.html
-├── package.json
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
-└── README.md
+│   │   ├── common/      # Generic UI components (Toast, Skeleton, etc.)
+│   │   ├── layout/      # Layout components (Header, StatusBar)
+│   │   ├── modal/       # Coin Detail Modal
+│   │   └── table/       # Data table components and Sparklines
+│   ├── context/         # React Context (Theme, Toast)
+│   ├── hooks/           # Custom hooks (Workers, Search, Sort, Favorites)
+│   ├── lib/             # Utilities, Constants, Schemas
+│   ├── types/           # TypeScript definitions
+│   ├── workers/         # Dedicated Web Worker for WebSocket handling
+│   ├── App.tsx          # Main application component
+│   └── main.tsx         # Entry point
+└── ...config files
 ```
 
 ## Configuration
@@ -126,41 +96,21 @@ Create a `.env` file based on `.env.example`:
 VITE_COINGECKO_API_URL=https://api.coingecko.com/api/v3
 VITE_BINANCE_WS_URL=wss://stream.binance.com:9443
 
-# Feature Flags
-VITE_ENABLE_ANALYTICS=false
-
 # Intervals (milliseconds)
 VITE_RANKING_REFRESH_INTERVAL=300000
 VITE_STATS_INTERVAL=1000
 ```
 
-## Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
-- `npm run typecheck` - Run TypeScript type checking
-
 ## Architecture
 
 ### Web Worker Pattern
 
-Price updates are handled in a dedicated Web Worker to prevent blocking the main thread:
-
-- **Main Thread**: UI rendering, user interactions
-- **Worker Thread**: API calls, WebSocket connections, price calculations
-
-### State Management
-
-- **Local State**: React hooks for component state
-- **Context**: Theme and toast notifications
-- **Worker Messages**: Price updates via postMessage API
+To ensure the UI remains buttery smooth even during high-volatility market events, all data processing is offloaded:
+1.  **Main Thread**: Handles UI rendering and user interaction only.
+2.  **Worker Thread**: Manages WebSocket connections, parses incoming binary/JSON data, merges updates with CoinGecko metadata, and computes statistics.
 
 ### Performance Optimizations
 
-- **Memoization**: React.memo for expensive components
-- **Direct DOM Updates**: Price changes bypass React for speed
-- **Code Splitting**: Manual chunks for better caching
-- **Tree Shaking**: Unused code eliminated in build
+- **Direct DOM Manipulation**: Price updates bypass the standard React render cycle for specific text nodes to minimize overhead during rapid updates.
+- **Tabular Numerals**: CSS font settings prevent layout shifts when numbers change width.
+- **Debounced Search**: Filtering logic is optimized for large lists.

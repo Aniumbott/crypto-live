@@ -3,17 +3,17 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  
+
   resolve: {
     alias: {
       '@': new URL('./src', import.meta.url).pathname,
     },
   },
-  
+
   worker: {
     format: 'es',
   },
-  
+
   build: {
     target: 'esnext',
     minify: 'terser',
@@ -31,7 +31,7 @@ export default defineConfig({
       },
     },
   },
-  
+
   server: {
     port: 3000,
   },

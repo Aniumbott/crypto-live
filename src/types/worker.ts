@@ -6,11 +6,11 @@ export interface WorkerStats {
   latency: number;
 }
 
-export type WorkerMessageIn = 
+export type WorkerMessageIn =
   | { type: 'ping' }
   | { type: 'refresh' };
 
-export type WorkerMessageOut = 
+export type WorkerMessageOut =
   | { type: 'coins'; coins: CoinData[] }
   | { type: 'price'; update: PriceUpdate }
   | { type: 'stats'; updates: number }

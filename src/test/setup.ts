@@ -1,17 +1,71 @@
 import '@testing-library/jest-dom';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
+// Cleanup after each test
 afterEach(() => {
   cleanup();
 });
 
+// Mock IntersectionObserver
+class MockIntersectionObserver {
+  observe = vi.fn();
+  disconnect = vi.fn();
+  unobserve = vi.fn();
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: MockIntersectionObserver,
+});
+
+// Mock matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
+// Mock ResizeObserver
+class MockResizeObserver {
+  observe = vi.fn();
+  disconnect = vi.fn();
+  unobserve = vi.fn();
+}
+
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  configurable: true,
+  value: MockResizeObserver,
+});
+
+// Mock fetch
+Object.defineProperty(globalThis, 'fetch', {
+  writable: true,
+  configurable: true,
+  value: vi.fn().mockImplementation(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve([]),
+    })
+  ),
+});
+
 // Mock WebSocket
 class MockWebSocket {
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSING = 2;
-  static CLOSED = 3;
+  static readonly CONNECTING = 0;
+  static readonly OPEN = 1;
+  static readonly CLOSING = 2;
+  static readonly CLOSED = 3;
 
   readyState = MockWebSocket.OPEN;
   onopen: (() => void) | null = null;
@@ -19,12 +73,16 @@ class MockWebSocket {
   onmessage: ((event: { data: string }) => void) | null = null;
   onerror: (() => void) | null = null;
 
-  close() {
-    this.readyState = MockWebSocket.CLOSED;
-    this.onclose?.();
+  constructor(_url: string) {
+    setTimeout(() => this.onopen?.(), 0);
   }
 
-  send(_data: string) {}
+  send = vi.fn();
+  close = vi.fn();
 }
 
-globalThis.WebSocket = MockWebSocket as unknown as typeof WebSocket;
+Object.defineProperty(globalThis, 'WebSocket', {
+  writable: true,
+  configurable: true,
+  value: MockWebSocket,
+});

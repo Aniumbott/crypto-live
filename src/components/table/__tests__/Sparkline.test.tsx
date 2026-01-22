@@ -3,47 +3,45 @@ import { render } from '@testing-library/react';
 import { Sparkline } from '../Sparkline';
 
 describe('Sparkline', () => {
-  it('renders SVG with path for valid data', () => {
-    const data = [100, 105, 103, 110, 108];
-    const { container } = render(<Sparkline data={data} positive={true} />);
-
+  it('renders sparkline with data', () => {
+    const data = [100, 105, 102, 108, 106, 110];
+    const { container } = render(<Sparkline data={data} isPositive={true} />);
+    
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveAttribute('aria-hidden', 'true');
-
+    
     const path = container.querySelector('path');
     expect(path).toBeInTheDocument();
-    expect(path).toHaveAttribute('stroke', 'var(--color-success)');
   });
 
-  it('renders empty div for insufficient data', () => {
-    const { container } = render(<Sparkline data={[100]} positive={true} />);
-
-    expect(container.querySelector('svg')).not.toBeInTheDocument();
-    expect(container.querySelector('.sparkline-empty')).toBeInTheDocument();
+  it('returns null for insufficient data', () => {
+    const { container } = render(<Sparkline data={[100]} isPositive={true} />);
+    
+    const svg = container.querySelector('svg');
+    expect(svg).not.toBeInTheDocument();
   });
 
-  it('uses danger color for negative trend', () => {
-    const data = [100, 95, 90];
-    const { container } = render(<Sparkline data={data} positive={false} />);
-
-    const path = container.querySelector('path');
-    expect(path).toHaveAttribute('stroke', 'var(--color-danger)');
+  it('applies correct color for negative trend', () => {
+    const data = [110, 105, 102, 100];
+    const { container } = render(<Sparkline data={data} isPositive={false} />);
+    
+    const path = container.querySelectorAll('path')[1]; // The line path
+    expect(path).toHaveAttribute('stroke', '#ef4444');
   });
 
-  it('renders empty div for empty data array', () => {
-    const { container } = render(<Sparkline data={[]} positive={true} />);
-
-    expect(container.querySelector('svg')).not.toBeInTheDocument();
-    expect(container.querySelector('.sparkline-empty')).toBeInTheDocument();
+  it('returns null for empty data', () => {
+    const { container } = render(<Sparkline data={[]} isPositive={true} />);
+    
+    const svg = container.querySelector('svg');
+    expect(svg).not.toBeInTheDocument();
   });
 
   it('respects custom dimensions', () => {
-    const data = [100, 110, 105];
+    const data = [100, 105, 102, 108];
     const { container } = render(
-      <Sparkline data={data} positive={true} width={200} height={60} />
+      <Sparkline data={data} isPositive={true} width={200} height={60} />
     );
-
+    
     const svg = container.querySelector('svg');
     expect(svg).toHaveAttribute('width', '200');
     expect(svg).toHaveAttribute('height', '60');
