@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Real-time cryptocurrency prices with live WebSocket updates" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    
+    <title>CryptoLive | Real-Time Prices</title>
+    
+    <link rel="preconnect" href="https://api.coingecko.com" />
+    <link rel="preconnect" href="https://stream.binance.com" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <style>
+      :root { --bg: #0d1117; --text: #8b949e; }
+      @media (prefers-color-scheme: light) { :root { --bg: #fff; --text: #57606a; } }
+      body { margin: 0; background: var(--bg); font-family: system-ui, sans-serif; }
+      .loader { display: flex; align-items: center; justify-content: center; min-height: 100vh; color: var(--text); }
+    </style>
+    
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 
+          (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"><div class="loader">Loading...</div></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
