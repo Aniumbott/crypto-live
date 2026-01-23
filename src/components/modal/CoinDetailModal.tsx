@@ -91,7 +91,7 @@ export function CoinDetailModal({ coinId, coins, onClose }: CoinDetailModalProps
                 {coin.name}
               </h2>
               <p className="text-surface-500 dark:text-surface-400 uppercase">
-                {coin.symbol} â€¢ Rank #{coin.marketCapRank}
+                {coin.symbol} Rank #{coin.marketCapRank}
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export function CoinDetailModal({ coinId, coins, onClose }: CoinDetailModalProps
           </div>
 
           {/* Chart */}
-          <div className="bg-surface-50 dark:bg-surface-950/50 rounded-xl p-4 border border-surface-100 dark:border-surface-800">
+          <div className="bg-surface-50 dark:bg-surface-950/50 rounded-xl p-4 border border-surface-100 dark:border-surface-800 overflow-hidden">
             <p className="text-sm text-surface-500 dark:text-surface-400 mb-3">Last 7 Days</p>
             <Sparkline data={coin.sparkline} isPositive={isPositive} width={400} height={80} />
           </div>
@@ -173,7 +173,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-1">
         {label}
       </p>
-      <p className="text-lg font-semibold text-surface-900 dark:text-white">
+      <p className="font-semibold text-surface-900 dark:text-white text-[clamp(0.75rem,2vw,1rem)] break-words">
         {value}
       </p>
     </div>
